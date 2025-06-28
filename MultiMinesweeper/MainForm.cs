@@ -19,7 +19,7 @@ namespace MultiMinesweeper
 
             _client = new TcpClient();
 
-            Task.Run(Loading);
+            Loading();
         }
 
         private void Loading()
@@ -33,12 +33,19 @@ namespace MultiMinesweeper
             string pubKey = File.ReadAllText("key.pub");
             byte[] pubKeyBytes = Convert.FromBase64String(pubKey);
 
-            _client.Connect("localhost", 443);
+            if (File.Exists("server_ip") == false)
+            {
+                MessageBox.Show("Server IP file 'server_ip' not found. Please create a file with the server IP.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string serverIP = File.ReadAllText("server_ip");
+            _client.Connect(serverIP, 443);
 
             RSA rsa = RSA.Create();
             rsa.ImportRSAPublicKey(pubKeyBytes, out _);
 
-            byte[] aesKey = new byte[Packet.AES_RAW_KEY_SIZE]; // AES key size is 256 bits (32 bytes)
+            byte[] aesKey = new byte[AESWrapper.AES_RAW_KEY_SIZE]; // AES key size is 256 bits (32 bytes)
             RandomNumberGenerator.Fill(aesKey); // Fill with random bytes
 
             byte[] encryptedKey = rsa.Encrypt(aesKey, RSAEncryptionPadding.Pkcs1);
@@ -46,7 +53,27 @@ namespace MultiMinesweeper
             NetworkStream stream = _client.GetStream();
             stream.Write(encryptedKey, 0, encryptedKey.Length);
 
-            _aesKey = Packet.GenerateAESKey(aesKey);
+            _aesKey = AESWrapper.GenerateAESKey(aesKey);
+
+            Packet packet = new Packet(PacketType.PingRequest, Packet.PING_MSG);
+
+            byte[] packetData = packet.Serialize();
+            byte[] encryptedPacket = AESWrapper.EncryptPacket(packetData, _aesKey);
+        
+            stream.Write(encryptedPacket, 0, encryptedPacket.Length);
+            stream.Read(encryptedPacket, 0, encryptedPacket.Length);
+
+            packetData = AESWrapper.DecryptPacket(encryptedPacket, _aesKey);
+            packet = Packet.Deserialize(packetData);
+
+            if (packet.Type == PacketType.PingResponse && packet.Data.Length > 0 && packet.Data[0] == Packet.PING_MSG)
+            {
+                MessageBox.Show("Ping response received successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Failed to receive valid ping response.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

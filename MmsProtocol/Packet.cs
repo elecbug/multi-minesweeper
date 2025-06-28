@@ -1,4 +1,4 @@
-﻿using System.Runtime.Intrinsics.Arm;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -19,7 +19,6 @@ namespace MmsProtocol
     public class Packet
     {
         public const string PING_MSG = "Hello, world! Ping Test zz";
-        public const int AES_RAW_KEY_SIZE = 192;
 
         public PacketType Type { get; set; }
         public string[] Data { get; set; }
@@ -32,16 +31,21 @@ namespace MmsProtocol
 
         public byte[] Serialize()
         {
-            return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(this));
+            string json = JsonSerializer.Serialize(this);
+            return Encoding.UTF8.GetBytes(json);
         }
 
         public static Packet Deserialize(byte[] data)
         {
             string json = Encoding.UTF8.GetString(data);
-
             return JsonSerializer.Deserialize<Packet>(json) 
                 ?? throw new InvalidOperationException("Deserialization failed");
         }
+    }
+
+    public class AESWrapper
+    {
+        public const int AES_RAW_KEY_SIZE = 192;
 
         public static byte[] GenerateAESKey(byte[] packet)
         {
@@ -62,5 +66,50 @@ namespace MmsProtocol
 
             return result;
         }
+
+        public static byte[] EncryptPacket(byte[] packetData, byte[] aesKey)
+        {
+            if (aesKey.Length != 32)
+            {
+                throw new ArgumentException("AES key must be 256 bits (32 bytes) long.");
+            }
+
+            using var aes = Aes.Create();
+
+            aes.Key = aesKey;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            byte[] iv = new byte[aes.BlockSize / 8];
+            RandomNumberGenerator.Fill(iv); // Fill IV with random bytes
+
+            byte[] result = aes.EncryptCbc(packetData, iv, PaddingMode.PKCS7);
+
+            return iv.Concat(result).ToArray();
+        }
+
+        public static byte[] DecryptPacket(byte[] encryptedData, byte[] aesKey)
+        {
+            if (aesKey.Length != 32)
+            {
+                throw new ArgumentException("AES key must be 256 bits (32 bytes) long.");
+            }
+            using var aes = Aes.Create();
+
+            aes.Key = aesKey;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            byte[] iv = new byte[aes.BlockSize / 8];
+            Array.Copy(encryptedData, 0, iv, 0, iv.Length); // Extract IV from the beginning of the encrypted data
+
+            byte[] encryptedContent = new byte[encryptedData.Length - iv.Length];
+            Array.Copy(encryptedData, iv.Length, encryptedContent, 0, encryptedContent.Length);
+
+            byte[] result = aes.DecryptCbc(encryptedContent, iv, PaddingMode.PKCS7);
+
+            return result;
+        }
+
     }
 }
