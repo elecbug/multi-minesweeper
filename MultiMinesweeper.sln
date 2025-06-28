@@ -5,6 +5,10 @@ VisualStudioVersion = 17.14.36127.28 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiMinesweeper", "MultiMinesweeper\MultiMinesweeper.csproj", "{B452E39C-3BAD-4421-BADF-77A1D323E19E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MmsServer", "MmsServer\MmsServer.csproj", "{C6B187DD-9D8B-452E-A3AF-8A39C95A69DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MmsProtocol", "MmsProtocol\MmsProtocol.csproj", "{19FFE67A-BCC6-482B-A3B7-602D6665AC03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{B452E39C-3BAD-4421-BADF-77A1D323E19E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B452E39C-3BAD-4421-BADF-77A1D323E19E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B452E39C-3BAD-4421-BADF-77A1D323E19E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6B187DD-9D8B-452E-A3AF-8A39C95A69DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6B187DD-9D8B-452E-A3AF-8A39C95A69DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6B187DD-9D8B-452E-A3AF-8A39C95A69DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6B187DD-9D8B-452E-A3AF-8A39C95A69DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19FFE67A-BCC6-482B-A3B7-602D6665AC03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19FFE67A-BCC6-482B-A3B7-602D6665AC03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19FFE67A-BCC6-482B-A3B7-602D6665AC03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19FFE67A-BCC6-482B-A3B7-602D6665AC03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
