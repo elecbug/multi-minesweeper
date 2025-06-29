@@ -19,7 +19,18 @@ namespace MultiMinesweeper
 
             _client = new TcpClient();
 
-            Loading();
+            while (true)
+            {
+                try
+                {
+                    Loading();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void Loading()
